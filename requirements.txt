@@ -1,8 +1,5 @@
-pydantic
-python-dotenv
+gradio>=3.50.0
+pydantic>=1.10.0
 ddgs
-wikipedia
-gradio
-gunicorn>=20.1.0
-
-
+wikipedia>=1.4.0
+python-dotenv
