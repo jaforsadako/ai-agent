@@ -1,7 +1,11 @@
-import gradio as gr
-from tools import search_tool, wiki_tool, save_tool
-from pydantic import BaseModel
+import os
 from pathlib import Path
+from datetime import datetime
+
+import gradio as gr
+from pydantic import BaseModel
+
+from tools import search_tool, wiki_tool, save_tool
 
 SAVE_FILE = "research_output.txt"
 
@@ -19,7 +23,7 @@ def summarize_offline(content: str) -> str:
     return summary.strip() if summary else "No summary available."
 
 # --------- Research Function ---------
-def research_agent(topic: str) -> tuple[str, str]:
+def research_agent(topic: str):
     tools_used = []
     sources = []
     collected_content = ""
@@ -63,11 +67,11 @@ def research_agent(topic: str) -> tuple[str, str]:
 
     return formatted_output, saved_content
 
-# --------- Load all saved research on start ---------
-def load_saved_research() -> str:
+# --------- Load saved research ---------
+def load_saved_research():
     return Path(SAVE_FILE).read_text(encoding="utf-8") if Path(SAVE_FILE).exists() else ""
 
-# --------- Gradio Blocks UI ---------
+# --------- Gradio UI ---------
 with gr.Blocks() as demo:
     gr.Markdown("# Offline AI Research Assistant")
     gr.Markdown(
@@ -76,32 +80,17 @@ with gr.Blocks() as demo:
     )
 
     with gr.Row():
-        topic_input = gr.Textbox(
-            label="Enter a topic",
-            placeholder="Type your research topic here...",
-            lines=4
-        )
+        topic_input = gr.Textbox(label="Enter a topic", placeholder="Type your research topic here...", lines=4)
 
     with gr.Row():
-        summary_output = gr.Textbox(
-            label="Research Summary",
-            lines=15,
-            max_lines=50
-        )
-        saved_output = gr.Textbox(
-            label="All Saved Research",
-            lines=15,
-            max_lines=50
-        )
+        summary_output = gr.Textbox(label="Research Summary", lines=15, max_lines=50)
+        saved_output = gr.Textbox(label="All Saved Research", lines=15, max_lines=50)
 
-    # Button to trigger research
     research_btn = gr.Button("Research")
-
-    # Connect button
     research_btn.click(fn=research_agent, inputs=topic_input, outputs=[summary_output, saved_output])
-
-    # Load saved research automatically on start
     demo.load(fn=load_saved_research, outputs=saved_output)
 
+# --------- Launch ---------
 if __name__ == "__main__":
-    demo.launch()
+    port = int(os.environ.get("PORT", 8080))
+    demo.launch(server_name="0.0.0.0", server_port=port)
