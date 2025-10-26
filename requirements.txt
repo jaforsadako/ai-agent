@@ -3,3 +3,6 @@ python-dotenv
 ddgs
 wikipedia
 gradio
+gunicorn>=20.1.0
+
+
